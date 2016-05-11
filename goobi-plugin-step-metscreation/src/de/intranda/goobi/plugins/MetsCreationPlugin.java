@@ -56,7 +56,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         return PLUGIN_NAME;
     }
 
-    @Override
+    
     public String getDescription() {
         return PLUGIN_NAME;
     }
@@ -172,6 +172,11 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
     @Override
     public PluginGuiType getPluginGuiType() {
         return PluginGuiType.NONE;
+    }
+
+    @Override
+    public String getPagePath() {
+        return null;
     }
 
 }
