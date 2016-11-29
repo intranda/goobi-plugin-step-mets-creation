@@ -123,13 +123,15 @@ public class METSCreatePaginationPlugin implements IStepPlugin, IPlugin {
 		// check for valid filepath
 		try {
 			List<? extends Metadata> filepath = physicaldocstruct.getAllMetadataByType(MDTypeForPath);
+			Metadata mdForPath;
 			if (filepath == null || filepath.isEmpty()) {
-				Metadata mdForPath = new Metadata(MDTypeForPath);
-
+				mdForPath = new Metadata(MDTypeForPath);
+				physicaldocstruct.addMetadata(mdForPath);
+			} else {
+				mdForPath = filepath.get(0);
+			}
 				mdForPath.setValue("file://" + process.getImagesTifDirectory(false));
 
-				physicaldocstruct.addMetadata(mdForPath);
-			}
 		} catch (Exception e) {
 			logger.error(e);
 		}
