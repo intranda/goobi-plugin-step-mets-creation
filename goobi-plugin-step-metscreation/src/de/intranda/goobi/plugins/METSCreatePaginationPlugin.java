@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -152,6 +153,8 @@ public class METSCreatePaginationPlugin implements IStepPlugin, IPlugin {
 				}
 			}));
 
+			Collections.sort(imageFiles);
+			
 			int pageNo = 0;
 			for (File file : imageFiles) {
 				pageNo++;
