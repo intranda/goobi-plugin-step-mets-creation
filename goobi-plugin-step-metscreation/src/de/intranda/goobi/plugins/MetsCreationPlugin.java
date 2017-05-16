@@ -98,7 +98,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
             Helper.setFehlerMeldung(e);
             return false;
         }
-        return true;
+        return false;
     }
 
     private void createDefaultValues(MetadatenHelper metadatenHelper, DocStruct element) {
@@ -114,7 +114,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
                         .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), false, process);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
-                MetadatumImpl meta = new MetadatumImpl(metadata, 0, this.prefs, this.process);
+                MetadatumImpl meta = new MetadatumImpl(metadata, 0, this.prefs, this.process, null);
                 meta.getSelectedItem();
                 lsMeta.add(meta);
             }
@@ -128,7 +128,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
                         .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), true, this.process);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
-                lsPers.add(new MetaPerson((Person) metadata, 0, this.prefs, element));
+                lsPers.add(new MetaPerson((Person) metadata, 0, this.prefs, element,process, null));
             }
         }
 
@@ -137,7 +137,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
                         .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), this.process);
         if (groups != null) {
             for (MetadataGroup mg : groups) {
-                metaGroups.add(new MetadataGroupImpl(prefs, process, mg));
+                metaGroups.add(new MetadataGroupImpl(prefs, process, mg, null));
             }
         }
 
