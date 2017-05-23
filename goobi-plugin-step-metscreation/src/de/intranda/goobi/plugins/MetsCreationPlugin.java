@@ -98,7 +98,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
             Helper.setFehlerMeldung(e);
             return false;
         }
-        return false;
+        return true;
     }
 
     private void createDefaultValues(MetadatenHelper metadatenHelper, DocStruct element) {
