@@ -111,7 +111,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
          */
         List<? extends Metadata> myTempMetadata =
                 metadatenHelper.getMetadataInclDefaultDisplay(element, (String) Helper
-                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), false, process);
+                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), false, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
                 MetadatumImpl meta = new MetadatumImpl(metadata, 0, this.prefs, this.process, null);
@@ -125,7 +125,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
          */
         myTempMetadata =
                 metadatenHelper.getMetadataInclDefaultDisplay(element, (String) Helper
-                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), true, this.process);
+                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), true, this.process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
                 lsPers.add(new MetaPerson((Person) metadata, 0, this.prefs, element,process, null));
