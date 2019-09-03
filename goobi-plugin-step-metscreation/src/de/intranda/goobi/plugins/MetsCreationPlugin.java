@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.xeoh.plugins.base.annotations.PluginImplementation;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.beans.Process;
 import org.goobi.beans.Step;
@@ -21,9 +20,9 @@ import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.metadaten.MetaPerson;
 import de.sub.goobi.metadaten.MetadataGroupImpl;
-import de.sub.goobi.metadaten.Metadaten;
 import de.sub.goobi.metadaten.MetadatenHelper;
 import de.sub.goobi.metadaten.MetadatumImpl;
+import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.Fileformat;
@@ -56,7 +55,6 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         return PLUGIN_NAME;
     }
 
-    
     public String getDescription() {
         return PLUGIN_NAME;
     }
@@ -101,20 +99,17 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         return true;
     }
 
-    private void createDefaultValues(MetadatenHelper metadatenHelper, DocStruct element) {
-
-        LinkedList<MetadatumImpl> lsMeta = new LinkedList<MetadatumImpl>();
-        LinkedList<MetaPerson> lsPers = new LinkedList<MetaPerson>();
-        List<MetadataGroupImpl> metaGroups = new LinkedList<MetadataGroupImpl>();
+    private void createDefaultValues(MetadatenHelper metahelper, DocStruct element) {
+        LinkedList<MetadatumImpl> lsMeta = new LinkedList<>();
+        LinkedList<MetaPerson> lsPers = new LinkedList<>();
+        List<MetadataGroupImpl> metaGroups = new LinkedList<>();
         /*
          * -------------------------------- alle Metadaten und die DefaultDisplay-Werte anzeigen --------------------------------
          */
-        List<? extends Metadata> myTempMetadata =
-                metadatenHelper.getMetadataInclDefaultDisplay(element, (String) Helper
-                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), false, process, true);
+        List<? extends Metadata> myTempMetadata = metahelper.getMetadataInclDefaultDisplay(element, "de", false, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
-                MetadatumImpl meta = new MetadatumImpl(metadata, 0, this.prefs, this.process, null);
+                MetadatumImpl meta = new MetadatumImpl(metadata, 0, prefs, process, null);
                 meta.getSelectedItem();
                 lsMeta.add(meta);
             }
@@ -123,27 +118,34 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         /*
          * -------------------------------- alle Personen und die DefaultDisplay-Werte ermitteln --------------------------------
          */
-        myTempMetadata =
-                metadatenHelper.getMetadataInclDefaultDisplay(element, (String) Helper
-                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), true, this.process, true);
+        myTempMetadata = metahelper.getMetadataInclDefaultDisplay(element, "de", true, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
-                lsPers.add(new MetaPerson((Person) metadata, 0, this.prefs, element,process, null));
+                lsPers.add(new MetaPerson((Person) metadata, 0, prefs, element, process, null));
             }
         }
 
-        List<MetadataGroup> groups =
-                metadatenHelper.getMetadataGroupsInclDefaultDisplay(element, (String) Helper
-                        .getManagedBeanValue("#{LoginForm.myBenutzer.metadatenSprache}"), this.process);
+        List<MetadataGroup> groups = metahelper.getMetadataGroupsInclDefaultDisplay(element, "de", process);
         if (groups != null) {
             for (MetadataGroup mg : groups) {
-                metaGroups.add(new MetadataGroupImpl(prefs, process, mg, null));
-            }
-        }
+                for (Metadata md : mg.getMetadataList()) {
+                    if (StringUtils.isBlank(md.getValue())) {
+                        md.setValue("");
+                    }
+                }
+                MetadataGroupImpl mgi = new MetadataGroupImpl(prefs, process, mg, null);
+                metaGroups.add(mgi);
+                for (MetadatumImpl meta : mgi.getMetadataList()) {
 
+                    meta.getSelectedItem();
+
+                }
+            }
+
+        }
         if (element.getAllChildren() != null && element.getAllChildren().size() > 0) {
             for (DocStruct ds : element.getAllChildren()) {
-                createDefaultValues(metadatenHelper, ds);
+                createDefaultValues(metahelper, ds);
             }
         }
 
