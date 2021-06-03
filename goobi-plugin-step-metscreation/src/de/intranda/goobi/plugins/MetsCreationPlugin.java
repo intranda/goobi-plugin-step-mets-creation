@@ -135,7 +135,8 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
                         md.setValue("");
                     }
                 }
-                MetadataGroupImpl mgi = new MetadataGroupImpl(prefs, process, mg, null);
+
+                MetadataGroupImpl mgi = new MetadataGroupImpl(prefs, process, mg, null, "", "", 0);
                 metaGroups.add(mgi);
                 for (MetadatumImpl meta : mgi.getMetadataList()) {
 
