@@ -4,21 +4,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import net.xeoh.plugins.base.annotations.PluginImplementation;
-
 import org.apache.log4j.Logger;
 import org.goobi.beans.Process;
 import org.goobi.beans.Step;
 import org.goobi.production.enums.PluginGuiType;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.enums.StepReturnValue;
-import org.goobi.production.importer.DocstructElement;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IStepPlugin;
 
 import de.sub.goobi.helper.Helper;
-import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
+import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.ContentFile;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -55,7 +52,6 @@ public class MapMETSCreationPlugin implements IStepPlugin, IPlugin {
         return PLUGIN_NAME;
     }
 
-    
     public String getDescription() {
         return PLUGIN_NAME;
     }
@@ -73,7 +69,7 @@ public class MapMETSCreationPlugin implements IStepPlugin, IPlugin {
         Fileformat ff = null;
         try {
             ff = process.readMetadataFile();
-        } catch (ReadException | PreferencesException | SwapException | DAOException | WriteException | IOException | InterruptedException e) {
+        } catch (ReadException | SwapException | IOException e) {
             logger.error(e);
             Helper.setFehlerMeldung(e);
             return false;
@@ -105,7 +101,7 @@ public class MapMETSCreationPlugin implements IStepPlugin, IPlugin {
 
         try {
             process.writeMetadataFile(ff);
-        } catch (PreferencesException | SwapException | DAOException | WriteException | IOException | InterruptedException e) {
+        } catch (PreferencesException | SwapException | WriteException | IOException e) {
             Helper.setFehlerMeldung(e);
             return false;
         }
@@ -116,7 +112,7 @@ public class MapMETSCreationPlugin implements IStepPlugin, IPlugin {
 
         MetadataType MDTypeForPath = prefs.getMetadataTypeByName("pathimagefiles");
 
-        /*-------------------------------- 
+        /*--------------------------------
          * der physische Baum wird nur
          * angelegt, wenn er noch nicht existierte
          * --------------------------------*/
@@ -140,7 +136,7 @@ public class MapMETSCreationPlugin implements IStepPlugin, IPlugin {
             logger.error(e);
         }
 
-        /*------------------------------- 
+        /*-------------------------------
          * retrieve existing pages/images
          * -------------------------------*/
         DocStructType newPage = prefs.getDocStrctTypeByName("page");

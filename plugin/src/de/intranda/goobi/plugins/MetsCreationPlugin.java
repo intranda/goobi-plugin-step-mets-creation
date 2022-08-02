@@ -16,7 +16,6 @@ import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IStepPlugin;
 
 import de.sub.goobi.helper.Helper;
-import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.metadaten.MetaPerson;
 import de.sub.goobi.metadaten.MetadataGroupImpl;
@@ -73,7 +72,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         Fileformat ff = null;
         try {
             ff = process.readMetadataFile();
-        } catch (ReadException | PreferencesException | SwapException | DAOException | WriteException | IOException | InterruptedException e) {
+        } catch (ReadException | SwapException | IOException e) {
             logger.error(e);
             Helper.setFehlerMeldung(e);
             return false;
@@ -93,7 +92,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
 
         try {
             process.writeMetadataFile(ff);
-        } catch (PreferencesException | SwapException | DAOException | WriteException | IOException | InterruptedException e) {
+        } catch (PreferencesException | SwapException | WriteException | IOException e) {
             Helper.setFehlerMeldung(e);
             return false;
         }
@@ -108,7 +107,8 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
          * -------------------------------- alle Metadaten und die DefaultDisplay-Werte anzeigen --------------------------------
          */
 
-        List<? extends Metadata> myTempMetadata = metahelper.getMetadataInclDefaultDisplay(element, "de", Metadaten.MetadataTypes.METATDATA,  process, true);
+        List<? extends Metadata> myTempMetadata =
+                metahelper.getMetadataInclDefaultDisplay(element, "de", Metadaten.MetadataTypes.METATDATA, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
                 MetadatumImpl meta = new MetadatumImpl(metadata, 0, prefs, process, null);
@@ -120,7 +120,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
         /*
          * -------------------------------- alle Personen und die DefaultDisplay-Werte ermitteln --------------------------------
          */
-        myTempMetadata = metahelper.getMetadataInclDefaultDisplay(element, "de",  Metadaten.MetadataTypes.PERSON,  process, true);
+        myTempMetadata = metahelper.getMetadataInclDefaultDisplay(element, "de", Metadaten.MetadataTypes.PERSON, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
                 lsPers.add(new MetaPerson((Person) metadata, 0, prefs, element, process, null));

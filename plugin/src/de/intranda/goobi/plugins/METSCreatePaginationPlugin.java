@@ -39,197 +39,194 @@ import ugh.exceptions.WriteException;
 @PluginImplementation
 public class METSCreatePaginationPlugin implements IStepPlugin, IPlugin {
 
-	private static final String PLUGIN_NAME = "METSCreatePagination";
-	private static final Logger logger = Logger.getLogger(METSCreatePaginationPlugin.class);
+    private static final String PLUGIN_NAME = "METSCreatePagination";
+    private static final Logger logger = Logger.getLogger(METSCreatePaginationPlugin.class);
 
-	private Step step;
-	private String returnPath;
-	private Process process;
-	private Prefs prefs;
+    private Step step;
+    private String returnPath;
+    private Process process;
+    private Prefs prefs;
 
-	@Override
-	public PluginType getType() {
-		return PluginType.Step;
-	}
+    @Override
+    public PluginType getType() {
+        return PluginType.Step;
+    }
 
-	@Override
-	public String getTitle() {
-		return PLUGIN_NAME;
-	}
+    @Override
+    public String getTitle() {
+        return PLUGIN_NAME;
+    }
 
-	public String getDescription() {
-		return PLUGIN_NAME;
-	}
+    public String getDescription() {
+        return PLUGIN_NAME;
+    }
 
-	@Override
-	public void initialize(Step step, String returnPath) {
-		this.step = step;
-		this.returnPath = returnPath;
-		process = step.getProzess();
-		prefs = process.getRegelsatz().getPreferences();
-	}
+    @Override
+    public void initialize(Step step, String returnPath) {
+        this.step = step;
+        this.returnPath = returnPath;
+        process = step.getProzess();
+        prefs = process.getRegelsatz().getPreferences();
+    }
 
-	@Override
-	public boolean execute() {
-		Fileformat ff = null;
-		try {
-			ff = process.readMetadataFile();
-		} catch (ReadException | PreferencesException | SwapException | DAOException | WriteException | IOException
-				| InterruptedException e) {
-			logger.error(e);
-			Helper.setFehlerMeldung(e);
-			return false;
-		}
+    @Override
+    public boolean execute() {
+        Fileformat ff = null;
+        try {
+            ff = process.readMetadataFile();
+        } catch (ReadException | SwapException | IOException e) {
+            logger.error(e);
+            Helper.setFehlerMeldung(e);
+            return false;
+        }
 
-		try {
+        try {
 
-			DigitalDocument dd = ff.getDigitalDocument();
-			DocStruct rootElement = dd.getLogicalDocStruct();
-			DocStruct physicalElement = dd.getPhysicalDocStruct();
-			try {
-				createPagination(physicalElement, rootElement, dd);
-			} catch (Exception e) {
-				logger.error(e);
-			}
-		} catch (PreferencesException e) {
-			logger.error(e);
-			Helper.setFehlerMeldung(e);
-			return false;
-		}
+            DigitalDocument dd = ff.getDigitalDocument();
+            DocStruct rootElement = dd.getLogicalDocStruct();
+            DocStruct physicalElement = dd.getPhysicalDocStruct();
+            try {
+                createPagination(physicalElement, rootElement, dd);
+            } catch (Exception e) {
+                logger.error(e);
+            }
+        } catch (PreferencesException e) {
+            logger.error(e);
+            Helper.setFehlerMeldung(e);
+            return false;
+        }
 
-		try {
-			process.writeMetadataFile(ff);
-		} catch (PreferencesException | SwapException | DAOException | WriteException | IOException
-				| InterruptedException e) {
-			Helper.setFehlerMeldung(e);
-			return false;
-		}
-		return true;
-	}
+        try {
+            process.writeMetadataFile(ff);
+        } catch (PreferencesException | SwapException | WriteException | IOException e) {
+            Helper.setFehlerMeldung(e);
+            return false;
+        }
+        return true;
+    }
 
-	public void createPagination(DocStruct physicaldocstruct, DocStruct log, DigitalDocument dd) throws Exception {
+    public void createPagination(DocStruct physicaldocstruct, DocStruct log, DigitalDocument dd) throws Exception {
 
-		MetadataType MDTypeForPath = prefs.getMetadataTypeByName("pathimagefiles");
+        MetadataType MDTypeForPath = prefs.getMetadataTypeByName("pathimagefiles");
 
-		/*-------------------------------- 
-		 * der physische Baum wird nur
-		 * angelegt, wenn er noch nicht existierte
-		 * --------------------------------*/
-		if (physicaldocstruct == null) {
-			DocStructType dst = prefs.getDocStrctTypeByName("BoundBook");
-			physicaldocstruct = dd.createDocStruct(dst);
-			dd.setPhysicalDocStruct(physicaldocstruct);
-		}
+        /*--------------------------------
+         * der physische Baum wird nur
+         * angelegt, wenn er noch nicht existierte
+         * --------------------------------*/
+        if (physicaldocstruct == null) {
+            DocStructType dst = prefs.getDocStrctTypeByName("BoundBook");
+            physicaldocstruct = dd.createDocStruct(dst);
+            dd.setPhysicalDocStruct(physicaldocstruct);
+        }
 
-		// check for valid filepath
-		try {
-			List<? extends Metadata> filepath = physicaldocstruct.getAllMetadataByType(MDTypeForPath);
-			Metadata mdForPath;
-			if (filepath == null || filepath.isEmpty()) {
-				mdForPath = new Metadata(MDTypeForPath);
-				physicaldocstruct.addMetadata(mdForPath);
-			} else {
-				mdForPath = filepath.get(0);
-			}
-				mdForPath.setValue("file://" + process.getImagesTifDirectory(false));
+        // check for valid filepath
+        try {
+            List<? extends Metadata> filepath = physicaldocstruct.getAllMetadataByType(MDTypeForPath);
+            Metadata mdForPath;
+            if (filepath == null || filepath.isEmpty()) {
+                mdForPath = new Metadata(MDTypeForPath);
+                physicaldocstruct.addMetadata(mdForPath);
+            } else {
+                mdForPath = filepath.get(0);
+            }
+            mdForPath.setValue("file://" + process.getImagesTifDirectory(false));
 
-		} catch (Exception e) {
-			logger.error(e);
-		}
+        } catch (Exception e) {
+            logger.error(e);
+        }
 
-		/*------------------------------- 
-		 * retrieve existing pages/images
-		 * -------------------------------*/
+        /*-------------------------------
+         * retrieve existing pages/images
+         * -------------------------------*/
 
-		File imagesDirectory = new File(process.getImagesTifDirectory(false));
-		if (imagesDirectory.isDirectory()) {
-			List<File> imageFiles = Arrays.asList(imagesDirectory.listFiles(new FilenameFilter() {
+        File imagesDirectory = new File(process.getImagesTifDirectory(false));
+        if (imagesDirectory.isDirectory()) {
+            List<File> imageFiles = Arrays.asList(imagesDirectory.listFiles(new FilenameFilter() {
 
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.toLowerCase().endsWith("tif") || name.toLowerCase().endsWith("tiff")
-							|| name.toLowerCase().endsWith("jpg") || name.toLowerCase().endsWith("jpeg")
-							|| name.toLowerCase().endsWith("jp2") || name.toLowerCase().endsWith("png");
-				}
-			}));
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.toLowerCase().endsWith("tif") || name.toLowerCase().endsWith("tiff") || name.toLowerCase().endsWith("jpg")
+                            || name.toLowerCase().endsWith("jpeg") || name.toLowerCase().endsWith("jp2") || name.toLowerCase().endsWith("png");
+                }
+            }));
 
-			Collections.sort(imageFiles);
-			
-			int pageNo = 0;
-			for (File file : imageFiles) {
-				pageNo++;
-				addPage(physicaldocstruct, log, dd, file, pageNo);
+            Collections.sort(imageFiles);
 
-			}
-		}
+            int pageNo = 0;
+            for (File file : imageFiles) {
+                pageNo++;
+                addPage(physicaldocstruct, log, dd, file, pageNo);
 
-	}
+            }
+        }
 
-	private void addPage(DocStruct physicaldocstruct, DocStruct log, DigitalDocument dd, File imageFile, int pageNo)
-			throws TypeNotAllowedForParentException, IOException, InterruptedException, SwapException, DAOException {
+    }
 
-		DocStructType newPage = prefs.getDocStrctTypeByName("page");
+    private void addPage(DocStruct physicaldocstruct, DocStruct log, DigitalDocument dd, File imageFile, int pageNo)
+            throws TypeNotAllowedForParentException, IOException, InterruptedException, SwapException, DAOException {
 
-		DocStruct dsPage = dd.createDocStruct(newPage);
-		try {
-			// physical page no
-			physicaldocstruct.addChild(dsPage);
-			MetadataType mdt = prefs.getMetadataTypeByName("physPageNumber");
-			Metadata mdTemp = new Metadata(mdt);
-			mdTemp.setValue(String.valueOf(pageNo));
-			dsPage.addMetadata(mdTemp);
+        DocStructType newPage = prefs.getDocStrctTypeByName("page");
 
-			// logical page no
-			mdt = prefs.getMetadataTypeByName("logicalPageNumber");
-			mdTemp = new Metadata(mdt);
+        DocStruct dsPage = dd.createDocStruct(newPage);
+        try {
+            // physical page no
+            physicaldocstruct.addChild(dsPage);
+            MetadataType mdt = prefs.getMetadataTypeByName("physPageNumber");
+            Metadata mdTemp = new Metadata(mdt);
+            mdTemp.setValue(String.valueOf(pageNo));
+            dsPage.addMetadata(mdTemp);
 
-			mdTemp.setValue("uncounted");
+            // logical page no
+            mdt = prefs.getMetadataTypeByName("logicalPageNumber");
+            mdTemp = new Metadata(mdt);
 
-			dsPage.addMetadata(mdTemp);
-			log.addReferenceTo(dsPage, "logical_physical");
+            mdTemp.setValue("uncounted");
 
-			// image name
-			ContentFile cf = new ContentFile();
+            dsPage.addMetadata(mdTemp);
+            log.addReferenceTo(dsPage, "logical_physical");
 
-			cf.setLocation("file://" + imageFile.getAbsolutePath());
+            // image name
+            ContentFile cf = new ContentFile();
 
-			dsPage.addContentFile(cf);
+            cf.setLocation("file://" + imageFile.getAbsolutePath());
 
-		} catch (TypeNotAllowedAsChildException e) {
-			logger.error(e);
-		} catch (MetadataTypeNotAllowedException e) {
-			logger.error(e);
-		}
-	}
+            dsPage.addContentFile(cf);
 
-	@Override
-	public String cancel() {
-		return returnPath;
-	}
+        } catch (TypeNotAllowedAsChildException e) {
+            logger.error(e);
+        } catch (MetadataTypeNotAllowedException e) {
+            logger.error(e);
+        }
+    }
 
-	@Override
-	public String finish() {
-		return returnPath;
-	}
+    @Override
+    public String cancel() {
+        return returnPath;
+    }
 
-	@Override
-	public HashMap<String, StepReturnValue> validate() {
-		return null;
-	}
+    @Override
+    public String finish() {
+        return returnPath;
+    }
 
-	@Override
-	public Step getStep() {
-		return step;
-	}
+    @Override
+    public HashMap<String, StepReturnValue> validate() {
+        return null;
+    }
 
-	@Override
-	public PluginGuiType getPluginGuiType() {
-		return PluginGuiType.NONE;
-	}
+    @Override
+    public Step getStep() {
+        return step;
+    }
 
-	@Override
-	public String getPagePath() {
-		return null;
-	}
+    @Override
+    public PluginGuiType getPluginGuiType() {
+        return PluginGuiType.NONE;
+    }
+
+    @Override
+    public String getPagePath() {
+        return null;
+    }
 
 }
