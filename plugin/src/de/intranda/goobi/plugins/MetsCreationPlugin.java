@@ -108,7 +108,7 @@ public class MetsCreationPlugin implements IStepPlugin, IPlugin {
          */
 
         List<? extends Metadata> myTempMetadata =
-                metahelper.getMetadataInclDefaultDisplay(element, "de", Metadaten.MetadataTypes.METATDATA, process, true);
+                metahelper.getMetadataInclDefaultDisplay(element, "de", Metadaten.MetadataTypes.METADATA, process, true);
         if (myTempMetadata != null) {
             for (Metadata metadata : myTempMetadata) {
                 MetadatumImpl meta = new MetadatumImpl(metadata, 0, prefs, process, null);
