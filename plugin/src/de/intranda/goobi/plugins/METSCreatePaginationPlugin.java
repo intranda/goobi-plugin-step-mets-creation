@@ -3,6 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Prefs;
+import ugh.dl.Reference;
 import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.ReadException;
@@ -152,6 +154,25 @@ public class METSCreatePaginationPlugin implements IStepPlugin, IPlugin {
 
             Collections.sort(imageFiles);
 
+            // cleanup old references
+            if (physicaldocstruct.getAllChildren() != null) {
+                List<DocStruct> pages = physicaldocstruct.getAllChildren();
+
+                for (DocStruct page : pages) {
+
+                    dd.getFileSet().removeFile(page.getAllContentFiles().get(0));
+
+                    List<Reference> refs = new ArrayList<>(page.getAllFromReferences());
+                    for (ugh.dl.Reference ref : refs) {
+                        ref.getSource().removeReferenceTo(page);
+                    }
+                }
+            }
+            while (physicaldocstruct.getAllChildren() != null && !physicaldocstruct.getAllChildren().isEmpty()) {
+                physicaldocstruct.removeChild(physicaldocstruct.getAllChildren().get(0));
+            }
+
+            // add new references
             int pageNo = 0;
             for (File file : imageFiles) {
                 pageNo++;
