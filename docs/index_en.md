@@ -3,6 +3,10 @@ title: Automatic METS enrichment with image files and pagination
 identifier: plugin_intranda_step_mets_creation
 description: Step plugins for the automatic enrichment of METS files with image assignment and pagination
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Step Plugin
 ---
 
 ## Introduction

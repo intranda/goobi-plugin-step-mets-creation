@@ -3,6 +3,10 @@ title: Automatische METS-Anreicherung mit Bilddateien und Paginierung
 identifier: plugin_intranda_step_mets_creation
 description: Step Plugins für die automatische Anreicherung von METS Dateien mit Bildzuweisung und Paginierung
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Step Plugin
 ---
 
 ## Einführung
